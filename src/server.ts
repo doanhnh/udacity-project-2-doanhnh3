@@ -40,15 +40,14 @@ import { filterImageFromURL, deleteLocalFiles } from './util/util';
     const image_url = req.query.image_url;
     const isValidUrl:any = image_url.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
     if (!image_url) {
-      res.status(BAD_REQUEST_HTTP_STATUS).send(IMAGE_URL_IS_NOT_NULL);
-    } else if (isValidUrl == null) {
-      res.status(BAD_REQUEST_HTTP_STATUS).send(IMAGE_URL_IS_INVALID);
-    } else {
-      const filteredpath = await filterImageFromURL(image_url.toString());
-      res.status(SUCCESS_HTTP_STATUS).sendFile(filteredpath, () => {
+      return res.status(BAD_REQUEST_HTTP_STATUS).send(IMAGE_URL_IS_NOT_NULL);
+    } if (isValidUrl == null) {
+      return res.status(BAD_REQUEST_HTTP_STATUS).send(IMAGE_URL_IS_INVALID);
+    } 
+    const filteredpath = await filterImageFromURL(image_url.toString());
+    return res.status(SUCCESS_HTTP_STATUS).sendFile(filteredpath, () => {
         deleteLocalFiles([filteredpath]);
       });
-    }
   });
   // Root Endpoint
   // Displays a simple message to the user
