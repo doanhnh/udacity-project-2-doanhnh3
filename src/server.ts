@@ -1,7 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 import { filterImageFromURL, deleteLocalFiles } from './util/util';
-import {validatior, httpStatus, messageResponse} from './util/app_contants';
 
 (async () => {
 
@@ -13,6 +12,12 @@ import {validatior, httpStatus, messageResponse} from './util/app_contants';
   // Use the body parser middleware for post requests
   app.use(bodyParser.json());
 
+  const IMAGE_URL_IS_NOT_NULL = "image url is not null"
+  const IMAGE_URL_IS_INVALID = "image url is invalid"
+  const SUCCESS_HTTP_STATUS = 200
+  const BAD_REQUEST_HTTP_STATUS = 400
+
+  //image url is invalid
   // @TODO1 IMPLEMENT A RESTFUL ENDPOINT
   // GET /filteredimage?image_url={{URL}}
   // endpoint to filter an image from a public url.
@@ -33,14 +38,14 @@ import {validatior, httpStatus, messageResponse} from './util/app_contants';
 
   app.get("/filteredimage", async (req: any, res: any) => {
     const image_url = req.query.image_url;
+    const isValidUrl:any = image_url.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
     if (!image_url) {
-      res.status(httpStatus.BAD_REQUEST).send(messageResponse.IMAGE_URL_IS_REQUIRED);
-    }
-    else if (!validatior.REGEX.test(image_url)) {
-      res.status(httpStatus.BAD_REQUEST).send(messageResponse.IMAGE_URL_IS_INVALID);
+      res.status(BAD_REQUEST_HTTP_STATUS).send(IMAGE_URL_IS_NOT_NULL);
+    } else if (isValidUrl == null) {
+      res.status(BAD_REQUEST_HTTP_STATUS).send(IMAGE_URL_IS_INVALID);
     } else {
       const filteredpath = await filterImageFromURL(image_url.toString());
-      res.status(httpStatus.SUCCESS).sendFile(filteredpath, () => {
+      res.status(SUCCESS_HTTP_STATUS).sendFile(filteredpath, () => {
         deleteLocalFiles([filteredpath]);
       });
     }
